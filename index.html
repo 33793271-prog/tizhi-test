@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>中医九种体质测试</title>
+  <style>
+    :root {
+      --primary: #8B3A1F;
+      --primary-light: #C4622D;
+      --accent: #D4A855;
+      --bg: #FDF8F2;
+      --card: #FFFFFF;
+      --text: #2C1A0E;
+      --text-muted: #7A5C46;
+      --border: #E8D5C0;
+      --selected: #8B3A1F;
+      --selected-text: #FFFFFF;
+      --progress-bg: #EDD9C4;
+      --shadow: 0 2px 12px rgba(139,58,31,0.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ===== 封面 ===== */
+    #cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      background: linear-gradient(160deg, #FDF8F2 0%, #F5E6D0 100%);
+    }
+    .cover-ornament {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    .cover-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .cover-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .cover-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
+    }
+    .cover-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+    .cover-card p + p { margin-top: 8px; }
+    .cover-card strong { color: var(--primary); }
+    .types-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .type-tag {
+      background: var(--progress-bg);
+      color: var(--primary);
+      border-radius: 8px;
+      padding: 6px 4px;
+      font-size: 12px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .btn-start {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 16px 48px;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(139,58,31,0.35);
+      transition: all 0.2s;
+      width: 100%;
+      max-width: 300px;
+    }
+    .btn-start:active { transform: scale(0.97); }
+
+    /* ===== 测试区 ===== */
+    #quiz { display: none; padding: 0 0 80px; }
+    .quiz-header {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      padding: 16px 20px 12px;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .quiz-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .quiz-section-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--progress-bg);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .quiz-progress-text {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .progress-bar-wrap {
+      background: var(--progress-bg);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* 题卡 */
+    .question-card {
+      margin: 16px 16px 0;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px 18px;
+      box-shadow: var(--shadow);
+      animation: slideIn 0.25s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .question-number {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .question-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .option-btn:active { transform: scale(0.99); }
+    .option-btn.selected {
+      background: var(--selected);
+      border-color: var(--selected);
+      color: var(--selected-text);
+    }
+    .option-btn.selected .option-dot {
+      background: white;
+      border-color: white;
+    }
+    .option-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .option-label { flex: 1; line-height: 1.4; }
+
+    /* 底部导航 */
+    .quiz-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0; right: 0;
+      background: rgba(253,248,242,0.96);
+      backdrop-filter: blur(8px);
+      padding: 12px 20px;
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-nav {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-prev {
+      background: var(--progress-bg);
+      color: var(--primary);
+    }
+    .btn-next {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      box-shadow: 0 3px 12px rgba(139,58,31,0.30);
+    }
+    .btn-nav:active { transform: scale(0.97); }
+    .btn-nav:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* 提示 */
+    .hint-toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(139,58,31,0.90);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+    }
+    .hint-toast.show { opacity: 1; }
+
+    /* ===== 结果页 ===== */
+    #result { display: none; padding: 24px 16px 60px; }
+    .result-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .result-icon { font-size: 60px; margin-bottom: 12px; }
+    .result-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .result-desc { font-size: 14px; color: var(--text-muted); }
+
+    /* 主体质大卡 */
+    .main-type-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 20px;
+      padding: 24px 20px;
+      color: white;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 24px rgba(139,58,31,0.30);
+    }
+    .main-type-label {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+    .main-type-name {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .main-type-score {
+      font-size: 14px;
+      opacity: 0.85;
+      margin-bottom: 12px;
+    }
+    .main-type-desc {
+      font-size: 14px;
+      line-height: 1.7;
+      opacity: 0.92;
+      border-top: 1px solid rgba(255,255,255,0.25);
+      padding-top: 12px;
+    }
+
+    /* 调理建议 */
+    .advice-section {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .advice-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .advice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .advice-item {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .advice-item-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .advice-item-content {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* 偏颇体质列表 */
+    .all-scores-section {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--progress-bg);
+    }
+    .score-row:last-child { border-bottom: none; }
+    .score-name { width: 60px; font-size: 14px; font-weight: 500; }
+    .score-bar-wrap {
+      flex: 1;
+      background: var(--progress-bg);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .score-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.8s ease;
+    }
+    .score-value { font-size: 13px; color: var(--text-muted); width: 40px; text-align: right; }
+    .score-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+    .tag-high { background: #FFE8E0; color: var(--primary); }
+    .tag-mid { background: #FFF5E0; color: #B87A00; }
+    .tag-low { background: #F0F0F0; color: #999; }
+
+    /* 兼夹体质 */
+    .mixed-section {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .mixed-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .mixed-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .mixed-tag {
+      background: var(--progress-bg);
+      color: var(--primary);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* 重测按钮 */
+    .btn-retry {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(139,58,31,0.30);
+      letter-spacing: 1px;
+    }
+    .btn-retry:active { transform: scale(0.98); }
+
+    .section-tip {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+
+    /* 性别提示 */
+    .gender-note {
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== 封面页 ===== -->
+<div id="cover">
+  <div class="cover-ornament">🌿</div>
+  <div class="cover-title">中医九种体质自测</div>
+  <div class="cover-subtitle">源自《中医体质分类与判定》国家标准</div>
+
+  <div class="cover-card">
+    <p>本测试依据中华中医药学会颁布的<strong>国家标准</strong>，约需 <strong>3～5 分钟</strong>，可辨识以下九种体质：</p>
+    <div class="types-grid">
+      <div class="type-tag">⚖️ 平和质</div>
+      <div class="type-tag">💨 气虚质</div>
+      <div class="type-tag">❄️ 阳虚质</div>
+      <div class="type-tag">🔥 阴虚质</div>
+      <div class="type-tag">💧 痰湿质</div>
+      <div class="type-tag">🌊 湿热质</div>
+      <div class="type-tag">🩸 血瘀质</div>
+      <div class="type-tag">😔 气郁质</div>
+      <div class="type-tag">🌸 特禀质</div>
+    </div>
+    <p style="margin-top:12px;">结果仅供参考，具体调理请咨询专业中医师。</p>
+  </div>
+
+  <button class="btn-start" onclick="startQuiz()">开始测试</button>
+</div>
+
+<!-- ===== 测试页 ===== -->
+<div id="quiz">
+  <div class="quiz-header">
+    <div class="quiz-header-top">
+      <span class="quiz-section-name" id="sectionName">平和质</span>
+      <span class="quiz-progress-text" id="progressText">1 / 67</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div id="questionContainer"></div>
+
+  <div class="quiz-footer">
+    <button class="btn-nav btn-prev" id="btnPrev" onclick="prevQuestion()">上一题</button>
+    <button class="btn-nav btn-next" id="btnNext" onclick="nextQuestion()">下一题</button>
+  </div>
+</div>
+
+<!-- 提示 -->
+<div class="hint-toast" id="hintToast">请选择一个选项后继续</div>
+
+<!-- ===== 结果页 ===== -->
+<div id="result">
+  <div class="result-header">
+    <div class="result-icon">📋</div>
+    <div class="result-title">您的体质分析结果</div>
+    <div class="result-desc">基于九种体质综合评估</div>
+  </div>
+  <div id="resultContent"></div>
+  <button class="btn-retry" onclick="restartQuiz()">重新测试</button>
+</div>
+
+<script>
+// =====================
+// 题库数据（45题，按体质分组，已去除重复）
+// =====================
+const SECTIONS = [
+  {
+    name: "平和质",
+    key: "pinghe",
+    icon: "⚖️",
+    reverseItems: [1, 2, 3, 4, 6, 7],
+    questions: [
+      "您精力充沛吗？",
+      "您容易疲乏吗？",
+      "您说话声音低弱无力吗？",
+      "您感到闷闷不乐吗？",
+      "您比一般人耐受不了寒冷吗？",
+      "您能适应外界自然和社会环境的变化吗？",
+      "您容易失眠吗？",
+      "您容易忘事（健忘）吗？",
+    ]
+  },
+  {
+    name: "气虚质",
+    key: "qixu",
+    icon: "💨",
+    reverseItems: [],
+    questions: [
+      "您容易气短（呼吸短促，接不上气）吗？",
+      "您容易心慌吗？",
+      "您容易头晕或站起时晕眩吗？",
+      "您比别人容易患感冒吗？",
+      "您喜欢安静、懒得说话吗？",
+      "您活动量稍大就容易出虚汗吗？",
+    ]
+  },
+  {
+    name: "阳虚质",
+    key: "yangxu",
+    icon: "❄️",
+    reverseItems: [],
+    questions: [
+      "您手脚发凉吗？",
+      "您胃脘部、背部或腰膝部怕冷吗？",
+      "您感到怕冷、衣服比别人穿得多吗？",
+      "您吃（喝）凉的东西会感到不舒服吗？",
+      "您受凉或吃凉东西后，容易腹泻吗？",
+    ]
+  },
+  {
+    name: "阴虚质",
+    key: "yinxu",
+    icon: "🔥",
+    reverseItems: [],
+    questions: [
+      "您感到手脚心发热吗？",
+      "您感觉身体、脸上发热吗？",
+      "您皮肤或口唇干燥吗？",
+      "您口唇的颜色比一般人红吗？",
+      "您容易便秘或大便干燥吗？",
+      "您面部两颧潮红或偏红吗？",
+      "您感到眼睛干涩吗？",
+    ]
+  },
+  {
+    name: "痰湿质",
+    key: "tanshi",
+    icon: "💧",
+    reverseItems: [],
+    questions: [
+      "您感到胸闷或腹部胀满吗？",
+      "您感到身体沉重不轻松吗？",
+      "您腹部肥满松软吗？",
+      "您有额部油脂分泌多的现象吗？",
+      "您上眼睑比别人肿吗？",
+      "您嘴里有黏黏的感觉吗？",
+      "您平时痰多，咽喉部有痰堵着吗？",
+      "您舌苔厚腻或有舌苔厚厚的感觉吗？",
+    ]
+  },
+  {
+    name: "湿热质",
+    key: "shire",
+    icon: "🌊",
+    reverseItems: [],
+    questions: [
+      "您面部或鼻部有油腻感吗？",
+      "您容易生痤疮或疮疖吗？",
+      "您感到口苦或嘴里有异味吗？",
+      "您大便黏滞不爽吗？",
+      "您小便时尿道有发热感吗？",
+      "您带下色黄吗？（限女性，不适用选'根本不是'）",
+      "您的阴囊部位潮湿吗？（限男性，不适用选'根本不是'）",
+    ]
+  },
+  {
+    name: "血瘀质",
+    key: "xueyu",
+    icon: "🩸",
+    reverseItems: [],
+    questions: [
+      "您的皮肤会出现青紫瘀斑吗？",
+      "您两颧部有细微红丝吗？",
+      "您身体上有哪里疼痛吗？",
+      "您面色晦黯或容易出现褐斑吗？",
+      "您容易有黑眼圈吗？",
+      "您口唇颜色偏黯吗？",
+    ]
+  },
+  {
+    name: "气郁质",
+    key: "qiyu",
+    icon: "😔",
+    reverseItems: [],
+    questions: [
+      "您感到情绪低沉吗？",
+      "您容易精神紧张、焦虑不安吗？",
+      "您多愁善感、感情脆弱吗？",
+      "您容易感到害怕或受到惊吓吗？",
+      "您胁肋部或乳房胀痛吗？",
+      "您无缘无故叹气吗？",
+      "您咽喉部有异物感吗？",
+    ]
+  },
+  {
+    name: "特禀质",
+    key: "teben",
+    icon: "🌸",
+    reverseItems: [],
+    questions: [
+      "您没有感冒时也会打喷嚏吗？",
+      "您没有感冒时也会鼻塞、流鼻涕吗？",
+      "您因季节变化、温度变化容易咳喘吗？",
+      "您容易过敏（药物、食物、花粉等）吗？",
+      "您的皮肤容易起荨麻疹吗？",
+      "您的皮肤一抓就红，并出现抓痕吗？",
+    ]
+  }
+];
+
+const OPTIONS = [
+  { label: "根本不是（没有）", score: 1 },
+  { label: "很少（有一点）",   score: 2 },
+  { label: "有时（有些）",     score: 3 },
+  { label: "经常（相当）",     score: 4 },
+  { label: "总是（非常）",     score: 5 },
+];
+
+// 扁平化题目列表
+const FLAT_QUESTIONS = [];
+SECTIONS.forEach((sec, si) => {
+  sec.questions.forEach((q, qi) => {
+    FLAT_QUESTIONS.push({ text: q, sectionIndex: si, localIndex: qi });
+  });
+});
+
+// 调试信息
+console.log('FLAT_QUESTIONS length:', FLAT_QUESTIONS.length);
+console.log('SECTIONS length:', SECTIONS.length);
+
+// 用户答案
+let answers = new Array(FLAT_QUESTIONS.length).fill(null);
+let currentIndex = 0;
+
+// =====================
+// 体质详情数据
+// =====================
+const TYPE_INFO = {
+  pinghe: {
+    name: "平和质",
+    icon: "⚖️",
+    desc: "阴阳气血调和，以体态适中、面色红润、精力充沛等为主要特征。",
+    advice: {
+      diet: "饮食有节，荤素搭配，五谷为养，五果为助，五畜为益，五菜为充。",
+      exercise: "适量运动即可，可选择散步、太极拳、八段锦等，保持规律作息。",
+      emotion: "保持乐观开朗，避免过激情绪，宜怡情养性。",
+      herb: "一般无需特别调养，可适当食用枸杞、大枣、核桃等平补食材。"
+    }
+  },
+  qixu: {
+    name: "气虚质",
+    icon: "💨",
+    desc: "元气不足，以疲乏、气短、自汗等气虚表现为主要特征。",
+    advice: {
+      diet: "宜食益气健脾之品，如黄芪、党参、山药、白扁豆、大枣，少食耗气生冷之物。",
+      exercise: "宜做柔缓运动，如八段锦、太极拳，避免大量出汗和剧烈运动。",
+      emotion: "避免过度劳神，宜宁心静神，保证充足睡眠。",
+      herb: "可用黄芪水代茶，或服用玉屏风散、补中益气丸等健脾补气。"
+    }
+  },
+  yangxu: {
+    name: "阳虚质",
+    icon: "❄️",
+    desc: "阳气不足，以畏寒怕冷、手足不温等虚寒表现为主要特征。",
+    advice: {
+      diet: "宜食温阳食物，如羊肉、韭菜、生姜、桂圆、核桃，少食生冷、苦寒之品。",
+      exercise: "宜在阳光下活动，避免迎风受寒，可做舒缓运动如散步、太极拳、慢跑。",
+      emotion: "阳虚易悲忧，宜积极进取，保持乐观阳光心态，多接触自然光照。",
+      herb: "可用干姜红糖水、桂圆红枣茶温补，或在医师指导下服用金匮肾气丸。"
+    }
+  },
+  yinxu: {
+    name: "阴虚质",
+    icon: "🔥",
+    desc: "阴液亏少，以口燥咽干、手足心热等虚热表现为主要特征。",
+    advice: {
+      diet: "宜食滋阴润燥之品，如银耳、百合、藕、蜂蜜、枸杞，忌辛辣燥烈食物。",
+      exercise: "适量运动，宜选游泳、散步、太极拳，避免剧烈运动大量出汗，夏日尤要避免中午活动。",
+      emotion: "阴虚易急躁，应学会自我调适，遇事冷静，修身养性。",
+      herb: "可用麦冬、玉竹泡水代茶饮，或在医师指导下服用六味地黄丸等滋阴养液。"
+    }
+  },
+  tanshi: {
+    name: "痰湿质",
+    icon: "💧",
+    desc: "痰湿凝聚，以形体肥胖、腹部肥满、口黏苔腻等痰湿表现为主要特征。",
+    advice: {
+      diet: "宜食健脾化痰之品，如白萝卜、荷叶、薏苡仁、冬瓜，少食甜腻、肥甘厚味食物。",
+      exercise: "宜加大运动量，可选择慢跑、球类、游泳，以微微出汗为宜，有助化湿。",
+      emotion: "保持心情舒畅，避免过度思虑，脾主思，思虑伤脾，易生痰湿。",
+      herb: "可服陈皮茶、荷叶茶，或在医师指导下服用二陈汤、参苓白术散等。"
+    }
+  },
+  shire: {
+    name: "湿热质",
+    icon: "🌊",
+    desc: "湿热内蕴，以面垢油光、口苦、苔黄腻等湿热表现为主要特征。",
+    advice: {
+      diet: "宜食清热利湿之品，如绿豆、薏苡仁、冬瓜、苦瓜、芹菜，戒烟戒酒，少食辛辣油腻。",
+      exercise: "可进行大量运动，如游泳、慢跑、爬山，有助清热化湿，宜在清晨或傍晚运动。",
+      emotion: "应克制急躁、易怒情绪，保持稳定情绪，清心寡欲。",
+      herb: "可饮菊花茶、金银花茶，或在医师指导下服用甘露消毒丹等清热祛湿。"
+    }
+  },
+  xueyu: {
+    name: "血瘀质",
+    icon: "🩸",
+    desc: "血行不畅，以肤色晦黯、舌质紫黯等血瘀表现为主要特征。",
+    advice: {
+      diet: "宜食活血散瘀之品，如山楂、醋、玫瑰花、红糖，少食生冷食物，忌食寒凉。",
+      exercise: "宜多做有益心脏血脉的活动，如舞蹈、太极拳、散步，以促进血液循环。",
+      emotion: "应培养乐观情绪，精神愉快则气血和畅，避免悲伤、抑郁等负面情绪。",
+      herb: "可饮玫瑰花茶、山楂茶，或在医师指导下服用血府逐瘀口服液等。"
+    }
+  },
+  qiyu: {
+    name: "气郁质",
+    icon: "😔",
+    desc: "气机郁滞，以神情抑郁、忧虑脆弱等气郁表现为主要特征。",
+    advice: {
+      diet: "宜食理气解郁之品，如橙子、佛手、玫瑰花、薤白，少食生冷、苦寒、黏腻之品。",
+      exercise: "宜多户外活动，如慢跑、武术、爬山，有助调畅气机，结交朋友，开朗心情。",
+      emotion: "主动学习心理调节，培养兴趣爱好，保持乐观豁达，避免多愁善感。",
+      herb: "可饮玫瑰花茶、茉莉花茶疏肝理气，或在医师指导下服用越鞠丸等。"
+    }
+  },
+  teben: {
+    name: "特禀质",
+    icon: "🌸",
+    desc: "先天失常，以生理缺陷、过敏反应等为主要特征。",
+    advice: {
+      diet: "宜食益气固表食物，如黄芪粥、大枣，避免接触过敏原，少食辛辣、牛奶等易过敏食物。",
+      exercise: "可适当运动以增强体质，但运动时注意花粉等过敏原，过敏发作期避免户外运动。",
+      emotion: "避免情绪激动诱发或加重过敏，保持心情平和，适当减少对环境的敏感关注。",
+      herb: "可在医师指导下服用玉屏风散、过敏煎等固卫抗敏，平时做好防护。"
+    }
+  }
+};
+
+// =====================
+// 核心逻辑
+// =====================
+function startQuiz() {
+  console.log('startQuiz called');
+  console.log('FLAT_QUESTIONS:', FLAT_QUESTIONS.length);
+  answers = new Array(FLAT_QUESTIONS.length).fill(null);
+  currentIndex = 0;
+  document.getElementById('cover').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function restartQuiz() {
+  document.getElementById('result').style.display = 'none';
+  startQuiz();
+}
+
+function renderQuestion() {
+  const q = FLAT_QUESTIONS[currentIndex];
+  const sec = SECTIONS[q.sectionIndex];
+
+  // 进度
+  const total = FLAT_QUESTIONS.length;
+  const pct = ((currentIndex + 1) / total * 100).toFixed(1);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${currentIndex + 1} / ${total}`;
+  document.getElementById('sectionName').textContent = sec.icon + ' ' + sec.name;
+
+  // 按钮状态
+  document.getElementById('btnPrev').disabled = currentIndex === 0;
+  document.getElementById('btnNext').textContent = currentIndex === total - 1 ? '查看结果 ✨' : '下一题';
+
+  // 题目
+  const container = document.getElementById('questionContainer');
+  const savedAnswer = answers[currentIndex];
+
+  container.innerHTML = `
+    <div class="question-card">
+      <div class="question-number">第 ${currentIndex + 1} 题 · ${sec.name}</div>
+      <div class="question-text">${q.text}</div>
+      <div class="options" id="optionList">
+        ${OPTIONS.map((opt, i) => `
+          <button class="option-btn ${savedAnswer === i ? 'selected' : ''}"
+                  onclick="selectOption(${i})">
+            <div class="option-dot"></div>
+            <div class="option-label">${opt.label}</div>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectOption(optionIndex) {
+  answers[currentIndex] = optionIndex;
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.classList.toggle('selected', i === optionIndex);
+  });
+  // 短暂延迟后自动下一题（体验更好）
+  setTimeout(() => {
+    if (currentIndex < FLAT_QUESTIONS.length - 1) {
+      currentIndex++;
+      renderQuestion();
+    }
+  }, 300);
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderQuestion();
+  }
+}
+
+function nextQuestion() {
+  if (answers[currentIndex] === null) {
+    showToast('请选择一个选项后继续');
+    return;
+  }
+  if (currentIndex < FLAT_QUESTIONS.length - 1) {
+    currentIndex++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('hintToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// =====================
+// 计算结果
+// =====================
+function calcScores() {
+  const results = {};
+  let flatIdx = 0;
+
+  SECTIONS.forEach((sec) => {
+    let rawSum = 0;
+    const n = sec.questions.length;
+
+    sec.questions.forEach((q, qi) => {
+      const ans = answers[flatIdx];
+      let score = ans !== null ? OPTIONS[ans].score : 3;
+      // 反向计分（1-indexed）
+      if (sec.reverseItems.includes(qi + 1)) {
+        score = 6 - score;
+      }
+      rawSum += score;
+      flatIdx++;
+    });
+
+    // 转化分 = (原始分 - 题目数) / (题目数 * 4) * 100
+    const transformed = ((rawSum - n) / (n * 4) * 100).toFixed(1);
+    results[sec.key] = {
+      name: sec.name,
+      icon: sec.icon,
+      raw: rawSum,
+      score: parseFloat(transformed),
+      count: n,
+    };
+  });
+
+  return results;
+}
+
+function judgeType(scores) {
+  const pingheScore = scores['pinghe'].score;
+  // 检查其他8种是否均<40
+  const otherKeys = Object.keys(scores).filter(k => k !== 'pinghe');
+  const allOthersLow = otherKeys.every(k => scores[k].score < 40);
+
+  if (pingheScore >= 60 && allOthersLow) {
+    return { main: 'pinghe', mixed: [] };
+  }
+
+  // 偏颇体质：所有>=40的
+  const biased = otherKeys.filter(k => scores[k].score >= 40).sort((a, b) => scores[b].score - scores[a].score);
+
+  if (biased.length === 0) {
+    // 基本平和
+    return { main: 'pinghe', mixed: [], note: 'basic' };
+  }
+
+  return { main: biased[0], mixed: biased.slice(1) };
+}
+
+function showResult() {
+  const scores = calcScores();
+  const judgment = judgeType(scores);
+  const mainKey = judgment.main;
+  const info = TYPE_INFO[mainKey];
+
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // 颜色映射
+  const BAR_COLORS = {
+    pinghe: '#6BAF6B',
+    qixu: '#85C1E9',
+    yangxu: '#5DADE2',
+    yinxu: '#E74C3C',
+    tanshi: '#7FB3D3',
+    shire: '#F0B27A',
+    xueyu: '#C0392B',
+    qiyu: '#8E44AD',
+    teben: '#F1948A'
+  };
+
+  // 排序所有体质（按得分降序）
+  const sorted = Object.entries(scores).sort((a, b) => b[1].score - a[1].score);
+
+  // 兼夹体质
+  let mixedHtml = '';
+  if (judgment.mixed.length > 0) {
+    const tags = judgment.mixed.map(k => `<span class="mixed-tag">${scores[k].icon || ''} ${scores[k].name}</span>`).join('');
+    mixedHtml = `
+      <div class="mixed-section">
+        <div class="mixed-title">🔀 兼夹体质</div>
+        <div class="mixed-tags">${tags}</div>
+        <p style="font-size:12px;color:#999;margin-top:10px;">您同时兼有以上体质倾向，调理时可综合考虑。</p>
+      </div>
+    `;
+  }
+
+  // 得分条
+  const scoreBars = sorted.map(([key, val]) => {
+    const pct = Math.min(100, val.score);
+    let tag = '';
+    if (val.score >= 60) tag = '<span class="score-tag tag-high">明显</span>';
+    else if (val.score >= 40) tag = '<span class="score-tag tag-mid">倾向</span>';
+    else tag = '<span class="score-tag tag-low">正常</span>';
+    const color = BAR_COLORS[key] || '#aaa';
+    return `
+      <div class="score-row">
+        <div class="score-name">${val.icon || ''} ${val.name}</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:${pct}%;background:${color};"></div>
+        </div>
+        <div class="score-value">${val.score}</div>
+        ${tag}
+      </div>
+    `;
+  }).join('');
+
+  const mainScore = scores[mainKey];
+
+  document.getElementById('resultContent').innerHTML = `
+    <div class="main-type-card">
+      <div class="main-type-label">您的主要体质</div>
+      <div class="main-type-name">${info.icon} ${info.name}</div>
+      <div class="main-type-score">转化分：${mainScore.score} 分</div>
+      <div class="main-type-desc">${info.desc}</div>
+    </div>
+
+    ${mixedHtml}
+
+    <div class="advice-section">
+      <div class="advice-title">🌱 调理建议</div>
+      <div class="advice-grid">
+        <div class="advice-item">
+          <div class="advice-item-title">🍽️ 饮食</div>
+          <div class="advice-item-content">${info.advice.diet}</div>
+        </div>
+        <div class="advice-item">
+          <div class="advice-item-title">🏃 运动</div>
+          <div class="advice-item-content">${info.advice.exercise}</div>
+        </div>
+        <div class="advice-item">
+          <div class="advice-item-title">🧘 情志</div>
+          <div class="advice-item-content">${info.advice.emotion}</div>
+        </div>
+        <div class="advice-item">
+          <div class="advice-item-title">🌿 中药食疗</div>
+          <div class="advice-item-content">${info.advice.herb}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="all-scores-section">
+      <div class="advice-title">📊 九种体质得分详情</div>
+      ${scoreBars}
+      <p style="font-size:11px;color:#bbb;margin-top:12px;">转化分≥60：明显倾向 / 40-59：有倾向 / <40：正常范围</p>
+    </div>
+
+    <p class="section-tip">本测试结果仅供参考，不作为医学诊断依据。<br>如有健康问题，请及时咨询专业中医师。</p>
+  `;
+}
+</script>
+</body>
+</html>
